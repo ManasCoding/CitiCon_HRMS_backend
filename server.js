@@ -43,8 +43,16 @@ app.use(helmet({
 // In production you can lock this down to specific domains.
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, curl, Postman) and any HTTP origin
-    callback(null, true);
+    const allowedOrigins = [
+      'https://citiconhrmsfrontend.vercel.app',
+      'http://localhost:5173',
+      'http://localhost:3000'
+    ];
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
   },
   credentials: true,
 }));
