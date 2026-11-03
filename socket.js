@@ -5,7 +5,12 @@ let io;
 export const initSocket = (server) => {
   io = new Server(server, {
     cors: {
-      origin: ["https://citiconhrmsfrontend.vercel.app", "http://localhost:5173", "http://localhost:3000"], 
+      origin: (origin, callback) => {
+        if (!origin || origin.endsWith('.vercel.app') || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+          return callback(null, true);
+        }
+        callback(null, true);
+      }, 
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
       credentials: true
     }
