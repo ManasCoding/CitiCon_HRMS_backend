@@ -26,7 +26,7 @@ async function createAdmin() {
       console.log('Admin updated');
     } else {
       admin = new Admin({
-        fullName: 'Guman Singh',
+        fullName: 'Oditech Global',
         email: 'gumansingh.oditechglobal@gmail.com',
         password: hashedPassword
       });
@@ -41,7 +41,7 @@ async function createAdmin() {
       await admin2.save();
     } else {
       admin2 = new Admin({
-        fullName: 'Guman Singh',
+        fullName: 'Oditech Global',
         email: 'gumansingh.CitiCon@gmail.com',
         password: hashedPassword
       });

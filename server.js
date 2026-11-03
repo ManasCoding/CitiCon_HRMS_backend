@@ -69,7 +69,7 @@ const seedData = async () => {
   try {
     // Admin
     const admins = [
-      { fullName: 'Guman Singh', email: 'gumansingh.oditechglobal@gmail.com', password: '123456' },
+      { fullName: 'Oditech Global', email: 'gumansingh.oditechglobal@gmail.com', password: '12345678' },
       { fullName: 'Oditech Official', email: 'oditechofficial@gmail.com', password: '123456' }
     ];
 

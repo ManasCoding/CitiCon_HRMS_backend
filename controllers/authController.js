@@ -33,7 +33,8 @@ export const login = async (req, res) => {
         // Check maintenance mode for admin (only bypass gumansingh.CitiCon@gmail.com)
         const maintenanceSetting = await SystemSetting.findOne({ key: 'maintenance_mode' });
         if (maintenanceSetting && (maintenanceSetting.value === 'true' || maintenanceSetting.value === true)) {
-          if (admin.email !== 'gumansingh.CitiCon@gmail.com') {
+          const superAdmins = ['gumansingh.citicon@gmail.com', 'gumansingh.oditechglobal@gmail.com', 'oditechofficial@gmail.com'];
+          if (!superAdmins.includes(admin.email.toLowerCase())) {
             const maintenanceMessage = await SystemSetting.findOne({ key: 'maintenance_message' });
             return res.status(503).json({
               success: false,
