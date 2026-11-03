@@ -44,7 +44,6 @@ app.use(helmet({
 app.use(cors({
   origin: (origin, callback) => {
     const allowedOrigins = [
-      'https://citiconhrmsfrontend.vercel.app',
       'http://localhost:5173',
       'http://localhost:3000'
     ];
@@ -128,7 +127,7 @@ connectDB().then(() => {
 });
 
 app.get("/", (req, res) => {
-  res.send("Working on Render 🚀");
+  res.send("API is running locally 🚀");
 });
 
 // Routes
