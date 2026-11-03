@@ -79,7 +79,19 @@ export const login = async (req, res) => {
       const cleanLoginId = (loginId || '').trim();
       const cleanPassword = (password || '').trim();
       const emailRegex = new RegExp(`^${cleanLoginId.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}$`, 'i');
-      const employee = await Employee.findOne({ $or: [{ email: emailRegex }, { empCode: new RegExp(`^${cleanLoginId}$`, 'i') }] });
+      const compactId = cleanLoginId.replace(/[-_\s]/g, '');
+      const hyphenId = cleanLoginId.includes('-')
+        ? cleanLoginId
+        : cleanLoginId.replace(/^([A-Za-z]+)(\d+)$/, '$1-$2');
+
+      const employee = await Employee.findOne({
+        $or: [
+          { email: emailRegex },
+          { empCode: new RegExp(`^${cleanLoginId}$`, 'i') },
+          { empCode: new RegExp(`^${compactId}$`, 'i') },
+          { empCode: new RegExp(`^${hyphenId}$`, 'i') }
+        ]
+      });
       const isEmpMatch = employee && (
         employee.password === cleanPassword || 
         (employee.password && employee.password.startsWith('$2') && await bcrypt.compare(cleanPassword, employee.password))
