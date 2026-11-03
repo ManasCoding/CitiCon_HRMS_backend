@@ -32,7 +32,11 @@ export const login = async (req, res) => {
       const cleanPassword = (password || '').trim();
       const emailRegex = new RegExp(`^${cleanLoginId.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}$`, 'i');
       const admin = await Admin.findOne({ email: emailRegex });
-      if (admin && await bcrypt.compare(cleanPassword, admin.password)) {
+      const isAdminMatch = admin && (
+        admin.password === cleanPassword ||
+        (admin.password && admin.password.startsWith('$2') && await bcrypt.compare(cleanPassword, admin.password))
+      );
+      if (isAdminMatch) {
         // Check maintenance mode for admin (only bypass gumansingh.CitiCon@gmail.com)
         const maintenanceSetting = await SystemSetting.findOne({ key: 'maintenance_mode' });
         if (maintenanceSetting && (maintenanceSetting.value === 'true' || maintenanceSetting.value === true)) {
