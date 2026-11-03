@@ -42,6 +42,7 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   'http://localhost:5174',
+  'https://neo-ren-hrms-frontend.vercel.app',
   'https://citi-con-hrms-frontend.vercel.app',
   'https://citiconhrmsfrontend.vercel.app',
   process.env.FRONTEND_URL

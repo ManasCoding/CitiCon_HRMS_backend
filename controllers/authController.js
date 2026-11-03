@@ -28,8 +28,11 @@ export const login = async (req, res) => {
 
   try {
     if (isAdmin) {
-      const admin = await Admin.findOne({ email: loginId });
-      if (admin && await bcrypt.compare(password, admin.password)) {
+      const cleanLoginId = (loginId || '').trim();
+      const cleanPassword = (password || '').trim();
+      const emailRegex = new RegExp(`^${cleanLoginId.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}$`, 'i');
+      const admin = await Admin.findOne({ email: emailRegex });
+      if (admin && await bcrypt.compare(cleanPassword, admin.password)) {
         // Check maintenance mode for admin (only bypass gumansingh.CitiCon@gmail.com)
         const maintenanceSetting = await SystemSetting.findOne({ key: 'maintenance_mode' });
         if (maintenanceSetting && (maintenanceSetting.value === 'true' || maintenanceSetting.value === true)) {
@@ -69,8 +72,15 @@ export const login = async (req, res) => {
         });
       }
     } else {
-      const employee = await Employee.findOne({ $or: [{ email: loginId }, { empCode: loginId }] });
-      if (employee && employee.password === password) {
+      const cleanLoginId = (loginId || '').trim();
+      const cleanPassword = (password || '').trim();
+      const emailRegex = new RegExp(`^${cleanLoginId.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}$`, 'i');
+      const employee = await Employee.findOne({ $or: [{ email: emailRegex }, { empCode: new RegExp(`^${cleanLoginId}$`, 'i') }] });
+      const isEmpMatch = employee && (
+        employee.password === cleanPassword || 
+        (employee.password && employee.password.startsWith('$2') && await bcrypt.compare(cleanPassword, employee.password))
+      );
+      if (isEmpMatch) {
         // Check maintenance mode
         const maintenanceSetting = await SystemSetting.findOne({ key: 'maintenance_mode' });
         if (maintenanceSetting && (maintenanceSetting.value === 'true' || maintenanceSetting.value === true)) {
@@ -143,7 +153,7 @@ export const forgotPassword = async (req, res) => {
     otpStore.set(user.email, otp);
 
     if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-      const fromName = process.env.FROM_NAME || 'CitiCon HRMS';
+      const fromName = process.env.FROM_NAME || 'NeoRen Enterprise HRMS';
       const fromEmail = process.env.FROM_EMAIL || process.env.SMTP_USER;
       const mailOptions = {
         from: `"${fromName}" <${fromEmail}>`,
@@ -222,7 +232,7 @@ export const resetPassword = async (req, res) => {
         dateStyle: 'medium',
         timeStyle: 'short'
       });
-      const fromName = process.env.FROM_NAME || 'CitiCon Support';
+      const fromName = process.env.FROM_NAME || 'NeoRen Enterprise Support';
       const fromEmail = process.env.FROM_EMAIL || process.env.SMTP_USER;
 
       try {
@@ -238,7 +248,7 @@ export const resetPassword = async (req, res) => {
                 <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 32px; text-align: center;">
                   <div style="display: inline-block; background: #22c55e; border-radius: 50%; width: 56px; height: 56px; line-height: 56px; text-align: center; font-size: 28px; margin-bottom: 12px;">✓</div>
                   <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px;">Password Reset Successful</h1>
-                  <p style="color: #94a3b8; margin: 8px 0 0; font-size: 13px;">CitiCon Pvt. Ltd. — HR Management System</p>
+                  <p style="color: #94a3b8; margin: 8px 0 0; font-size: 13px;">NeoRen Enterprise Pvt Ltd — HR Management System</p>
                 </div>
 
                 <!-- Body -->
@@ -284,7 +294,7 @@ export const resetPassword = async (req, res) => {
                 <!-- Footer -->
                 <div style="background: #f8fafc; padding: 16px; text-align: center; border-top: 1px solid #e2e8f0;">
                   <p style="color: #cbd5e1; font-size: 11px; margin: 0; text-transform: uppercase; letter-spacing: 0.1em;">
-                    © ${new Date().getFullYear()} CitiCon Pvt. Ltd. — Secure HR Portal
+                    © ${new Date().getFullYear()} NeoRen Enterprise Pvt Ltd — Secure HR Portal
                   </p>
                 </div>
 

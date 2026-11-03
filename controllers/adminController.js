@@ -1538,7 +1538,7 @@ export const emailHourlyReportsExcel = async (req, res) => {
     const htmlBody = `
       <p>Dear Sir,</p>
       <p>Please find attached the Hourly Work Report for ${formattedDate}.</p>
-      <p>Regards,<br/>HRMS - CitiCon</p>
+      <p>Regards,<br/>HRMS - NeoRen Enterprise</p>
     `;
 
     const attachments = [{
