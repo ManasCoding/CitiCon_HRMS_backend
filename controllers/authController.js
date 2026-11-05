@@ -83,13 +83,17 @@ export const login = async (req, res) => {
       const hyphenId = cleanLoginId.includes('-')
         ? cleanLoginId
         : cleanLoginId.replace(/^([A-Za-z]+)(\d+)$/, '$1-$2');
+      const altCode = cleanLoginId.toUpperCase().startsWith('OG')
+        ? cleanLoginId.replace(/^OG/i, 'DB')
+        : cleanLoginId.replace(/^DB/i, 'OG');
 
       const employee = await Employee.findOne({
         $or: [
           { email: emailRegex },
           { empCode: new RegExp(`^${cleanLoginId}$`, 'i') },
           { empCode: new RegExp(`^${compactId}$`, 'i') },
-          { empCode: new RegExp(`^${hyphenId}$`, 'i') }
+          { empCode: new RegExp(`^${hyphenId}$`, 'i') },
+          { empCode: new RegExp(`^${altCode}$`, 'i') }
         ]
       });
       const isEmpMatch = employee && (

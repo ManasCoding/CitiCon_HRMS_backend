@@ -148,8 +148,8 @@ export const checkIn = async (req, res) => {
       const settings = await SystemSetting.find({ key: { $in: ['office_lat', 'office_lng', 'geofence_radius'] } });
       const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: parseFloat(s.value) }), {});
       
-      const officeLat = settingsMap.office_lat || 20.2961;
-      const officeLng = settingsMap.office_lng || 85.8331;
+      const officeLat = settingsMap.office_lat || 20.440083;
+      const officeLng = settingsMap.office_lng || 85.841611;
       const allowedRadius = settingsMap.geofence_radius || 50;
 
       const distance = getDistance(numLat, numLng, officeLat, officeLng);
