@@ -12,13 +12,15 @@ import {
   removeDevice,
   getQrStats,
   getQrSettings,
-  updateQrSettings
+  updateQrSettings,
+  getPermanentOfficeQr
 } from '../controllers/qrAttendanceController.js';
 
 const router = express.Router();
 
 // ── Mobile Scanning & Device Verification (Public / Mobile Facing) ─────────────
 router.get('/office-qr', getLiveQrCode);
+router.get('/permanent-qr', getPermanentOfficeQr);
 router.post('/verify-token', verifyQrToken);
 router.post('/scan', scanQrAttendance);
 router.post('/register-and-checkin', registerDeviceAndCheckIn);
