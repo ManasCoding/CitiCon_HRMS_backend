@@ -24,6 +24,7 @@ import payrollRoutes from './routes/payrollRoutes.js';
 import policyRoutes from './routes/policyRoutes.js';
 import performanceRoutes from './routes/performanceRoutes.js';
 import siteVisitRoutes from './routes/siteVisitRoutes.js';
+import qrAttendanceRoutes from './routes/qrAttendanceRoutes.js';
 
 dotenv.config();
 
@@ -117,7 +118,9 @@ const seedData = async () => {
       { key: 'site_visit_max_overtime', value: 2 },
       { key: 'site_visit_overtime_enabled', value: true },
       { key: 'site_visit_overtime_approval_required', value: false },
-      { key: 'site_visit_geofence_radius', value: 200 }
+      { key: 'site_visit_geofence_radius', value: 200 },
+      { key: 'qr_token_expiry_seconds', value: 60 },
+      { key: 'qr_attendance_active', value: true }
     ];
 
     for (const setting of defaultSettings) {
@@ -156,6 +159,7 @@ app.use('/api/payroll', payrollRoutes);
 app.use('/api/policies', policyRoutes);
 app.use('/api/performance', performanceRoutes);
 app.use('/api/site-visits', siteVisitRoutes);
+app.use('/api/qr-attendance', qrAttendanceRoutes);
 
 // if (process.env.NODE_ENV !== 'production') {
 //   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
