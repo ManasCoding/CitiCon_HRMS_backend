@@ -80,7 +80,26 @@ export const getLiveQrCode = async (req, res) => {
     const expirySetting = await SystemSetting.findOne({ key: 'qr_token_expiry_seconds' });
     const expirySeconds = parseInt(expirySetting?.value, 10) || 60;
 
-    const frontendBaseUrl = (process.env.FRONTEND_URL || 'https://neo-ren-hrms-frontend.vercel.app').replace(/\/$/, '');
+    // Determine target attendance URL:
+    // 1. Database setting 'qr_frontend_url' if set
+    // 2. Query param baseUrl if passed from Admin UI
+    // 3. process.env.FRONTEND_URL if not localhost
+    // 4. Default to production 'https://neo-ren-hrms-frontend.vercel.app'
+    const urlSetting = await SystemSetting.findOne({ key: 'qr_frontend_url' });
+    let frontendBaseUrl = urlSetting?.value || req.query.baseUrl || process.env.FRONTEND_URL || 'https://neo-ren-hrms-frontend.vercel.app';
+    
+    // Safety check: If baseUrl points to localhost, mobile scanners will not work unless on the exact same device.
+    // Allow query override or fall back to production if not explicitly kept
+    if (req.query.baseUrl) {
+      frontendBaseUrl = req.query.baseUrl;
+    } else if (urlSetting?.value) {
+      frontendBaseUrl = urlSetting.value;
+    } else if (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes('localhost')) {
+      frontendBaseUrl = process.env.FRONTEND_URL;
+    } else {
+      frontendBaseUrl = 'https://neo-ren-hrms-frontend.vercel.app';
+    }
+    frontendBaseUrl = frontendBaseUrl.trim().replace(/\/$/, '');
 
     const nonce = crypto.randomBytes(16).toString('hex');
     const token = jwt.sign(
@@ -1027,7 +1046,7 @@ export const getQrStats = async (req, res) => {
  */
 export const getQrSettings = async (req, res) => {
   try {
-    const keys = ['qr_token_expiry_seconds', 'qr_attendance_active'];
+    const keys = ['qr_token_expiry_seconds', 'qr_attendance_active', 'qr_frontend_url'];
     const settings = await SystemSetting.find({ key: { $in: keys } });
     const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
 
@@ -1035,7 +1054,8 @@ export const getQrSettings = async (req, res) => {
       success: true,
       settings: {
         qr_token_expiry_seconds: parseInt(settingsMap.qr_token_expiry_seconds, 10) || 60,
-        qr_attendance_active: settingsMap.qr_attendance_active === 'true' || settingsMap.qr_attendance_active === true || settingsMap.qr_attendance_active === undefined
+        qr_attendance_active: settingsMap.qr_attendance_active === 'true' || settingsMap.qr_attendance_active === true || settingsMap.qr_attendance_active === undefined,
+        qr_frontend_url: settingsMap.qr_frontend_url || process.env.FRONTEND_URL || 'https://neo-ren-hrms-frontend.vercel.app'
       }
     });
   } catch (error) {
@@ -1048,7 +1068,15 @@ export const getQrSettings = async (req, res) => {
  */
 export const updateQrSettings = async (req, res) => {
   try {
-    const { qr_token_expiry_seconds, qr_attendance_active } = req.body;
+    const { qr_token_expiry_seconds, qr_attendance_active, qr_frontend_url } = req.body;
+
+    if (qr_frontend_url !== undefined) {
+      await SystemSetting.findOneAndUpdate(
+        { key: 'qr_frontend_url' },
+        { value: String(qr_frontend_url).trim() },
+        { upsert: true }
+      );
+    }
 
     if (qr_token_expiry_seconds !== undefined) {
       await SystemSetting.findOneAndUpdate(
