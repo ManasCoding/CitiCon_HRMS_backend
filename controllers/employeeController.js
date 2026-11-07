@@ -135,30 +135,9 @@ export const checkIn = async (req, res) => {
   try {
     let attendance = await Attendance.findOne({ employeeId, date: today });
     if (!attendance || !attendance.checkIn) {
-      // Validate GPS Geofence strictly on backend
-      const numLat = parseFloat(lat);
-      const numLng = parseFloat(lng);
-      if (isNaN(numLat) || isNaN(numLng)) {
-        return res.status(400).json({ 
-          success: false, 
-          message: 'Location permission and valid GPS coordinates are required to check in.' 
-        });
-      }
-
-      const settings = await SystemSetting.find({ key: { $in: ['office_lat', 'office_lng', 'geofence_radius'] } });
-      const settingsMap = settings.reduce((acc, s) => ({ ...acc, [s.key]: parseFloat(s.value) }), {});
-      
-      const officeLat = settingsMap.office_lat || 20.440083;
-      const officeLng = settingsMap.office_lng || 85.841611;
-      const allowedRadius = settingsMap.geofence_radius || 50;
-
-      const distance = getDistance(numLat, numLng, officeLat, officeLng);
-      if (distance > allowedRadius) {
-        return res.status(400).json({ 
-          success: false, 
-          message: `Check-in failed: You are ${Math.round(distance)}m away from the office. Must be within ${allowedRadius}m.` 
-        });
-      }
+      // Geofencing removed: allow check-in and login from anywhere
+      const numLat = !isNaN(parseFloat(lat)) ? parseFloat(lat) : null;
+      const numLng = !isNaN(parseFloat(lng)) ? parseFloat(lng) : null;
 
       // Official check-in threshold: 9:30 AM IST
       const LATE_THRESHOLD = '09:30';
